@@ -578,3 +578,4 @@ C:\Users\luisf\RiderProjects\NatureApi\NatureApi\obj\Debug\net9.0\refint\NatureA
 C:\Users\luisf\RiderProjects\NatureApi\NatureApi\obj\Debug\net9.0\NatureApi.pdb
 C:\Users\luisf\RiderProjects\NatureApi\NatureApi\obj\Debug\net9.0\NatureApi.genruntimeconfig.cache
 C:\Users\luisf\RiderProjects\NatureApi\NatureApi\obj\Debug\net9.0\ref\NatureApi.dll
+C:\Users\luisf\RiderProjects\NatureApi\NatureApi\obj\Debug\net9.0\NatureApi.sourcelink.json

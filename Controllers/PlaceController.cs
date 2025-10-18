@@ -8,12 +8,11 @@ using NatureApi.Entities;
 namespace NatureApi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController] 
     public class PlaceController : ControllerBase
     {
         
         private readonly StoreDbContext _context;
-
         public PlaceController(StoreDbContext context)
         {
             _context = context;
