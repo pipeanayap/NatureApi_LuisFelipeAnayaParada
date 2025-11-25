@@ -7,7 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SqlServer");
 
 // Add services to the container.
-
+var openAIKey =  builder.Configuration["OpenAIKey"];
+Console.WriteLine($"OpenAiKey: {openAIKey}");
+// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

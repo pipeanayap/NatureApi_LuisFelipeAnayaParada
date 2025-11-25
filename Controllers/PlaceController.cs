@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NatureApi.DTO_s;
 using NatureApi.Entities;
+using OpenAI.Chat;
 
 namespace NatureApi.Controllers
 {
@@ -13,9 +14,12 @@ namespace NatureApi.Controllers
     {
         
         private readonly StoreDbContext _context;
-        public PlaceController(StoreDbContext context)
+        private readonly IConfiguration _config;
+        public PlaceController(StoreDbContext context, IConfiguration config)
         {
             _context = context;
+            _config =  config;
+
         }
         
         [HttpGet("{id}")]
@@ -92,10 +96,61 @@ namespace NatureApi.Controllers
         }
         
         
+        [HttpGet("{id}/ai-facts")]
+        public async Task<ActionResult> GetPlaceFacts(int id)
+        {
+            // Obtener el APIKey
+            var openAIKey = _config["OpenAIKey"];
+            var client = new ChatClient(model: "gpt-4o-mini", apiKey: openAIKey);
+
+            // Obtener datos del lugar con todas sus relaciones
+            var place = await _context.Place
+                .Include(p => p.Photos)
+                .Include(p => p.Trails)
+                .Include(p => p.Reviews)
+                .Include(p => p.PlaceAmenities)
+                .ThenInclude(pa => pa.Amenity)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (place == null)
+                return NotFound();
+
+            // Preparar datos para la IA
+            var placeData = new
+            {
+                place.Name,
+                place.Description,
+                place.Category,
+                Latitude = place.Latitude,
+                Longitude = place.Longitude,
+                place.ElevationMeters,
+                PhotosCount = place.Photos.Count,
+                TrailsCount = place.Trails.Count,
+                Trails = place.Trails.Select(t => new { t.Name, t.Difficulty, t.DistanceKm }),
+                Reviews = place.Reviews.Select(r => new { r.Rating, r.Comment }),
+                Amenities = place.PlaceAmenities.Select(pa => pa.Amenity.Name)
+            };
+
+            var jsonData = System.Text.Json.JsonSerializer.Serialize(placeData);
+
+            // Crear prompt
+            var prompt = Prompts.GenerateFacts(jsonData);
+
+            // Llamar a la IA
+            var result = await client.CompleteChatAsync(
+                [new UserChatMessage(prompt)]);
+
+            var response = result.Value.Content[0].Text;
+
+            return Ok(response);
+        }
+    }
+        
+        
         
 
         
         
         
     }
-}
+
